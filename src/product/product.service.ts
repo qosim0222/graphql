@@ -1,26 +1,59 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateProductInput } from './dto/create-product.input';
 import { UpdateProductInput } from './dto/update-product.input';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class ProductService {
-  create(createProductInput: CreateProductInput) {
-    return 'This action adds a new product';
+  constructor(private readonly prisma:PrismaService){}
+
+ async create(createProductInput: CreateProductInput) {
+   try {
+    let created = await this.prisma.product.create({data:createProductInput})
+    return {data: created}
+   } catch (error) {
+    throw new BadRequestException(error.message)
+   }
   }
 
-  findAll() {
-    return `This action returns all product`;
+  
+  async findAll() {
+    try {
+      let data = await this.prisma.product.findMany()
+      return { data }
+    } catch (error) {
+      throw new BadRequestException(error.message)
+
+    }
+
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
+  async findOne(id: number) {
+    try {
+      let data = await this.prisma.product.findUnique({ where: { id } })
+      return { data }
+    } catch (error) {
+      throw new BadRequestException(error.message)
+
+    }
   }
 
-  update(id: number, updateProductInput: UpdateProductInput) {
-    return `This action updates a #${id} product`;
+  async update(id: number, updateProductInput: UpdateProductInput) {
+    try {
+      let updated = await this.prisma.product.update({ where: { id }, data: updateProductInput })
+      return { data: updated }
+    } catch (error) {
+      throw new BadRequestException(error.message)
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} product`;
+  async remove(id: number) {
+
+    try {
+      let deleted = await this.prisma.product.delete({ where: { id } })
+    return {data: deleted}
+    } catch (error) {
+      throw new BadRequestException(error.message)
+    }
   }
 }
